@@ -1,12 +1,19 @@
-package user_handler
+package userHandler
 
-import "net/http"
+import (
+	"net/http"
 
-func NewUserHandler() UserHandler {
-	return &handler{}
+	userService "github.com/DevJonathanSantos/poc-go-api/internal/service/userservice"
+)
+
+func NewUserHandler(service userService.UserService) UserHandler {
+	return &handler{
+		service,
+	}
 }
 
 type handler struct {
+	service userService.UserService
 }
 
 type UserHandler interface {
