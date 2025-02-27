@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/DevJonathanSantos/poc-go-api/internal/dto"
+	"github.com/DevJonathanSantos/poc-go-api/internal/handler/response"
 	userRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/userepository"
 )
 
@@ -20,4 +21,5 @@ type service struct {
 type UserService interface {
 	CreateUser(ctx context.Context, u dto.CreateUserDto) error
 	UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string) error
+	GetUserByID(ctx context.Context, id string) (*response.UserResponse, error)
 }
