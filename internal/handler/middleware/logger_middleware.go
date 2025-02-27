@@ -30,9 +30,7 @@ func LoggerData(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var requestData map[string]interface{}
 		if r.Body != http.NoBody {
-			// copy body
 			CopyBody, _ := io.ReadAll(r.Body)
-			// restore body
 			r.Body = io.NopCloser(bytes.NewBuffer(CopyBody))
 			if err := json.Unmarshal(CopyBody, &requestData); err != nil {
 				slog.Error("error unmarshalling request data", err, slog.String("func", "LoggerData"))
