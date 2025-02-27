@@ -1,6 +1,11 @@
 package userService
 
-import userRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/userepository"
+import (
+	"context"
+
+	"github.com/DevJonathanSantos/poc-go-api/internal/dto"
+	userRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/userepository"
+)
 
 func NewUserService(repo userRepository.UserRepository) UserService {
 	return &service{
@@ -13,5 +18,6 @@ type service struct {
 }
 
 type UserService interface {
-	CreateUser() error
+	CreateUser(ctx context.Context, u dto.CreateUserDto) error
+	UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string) error
 }
