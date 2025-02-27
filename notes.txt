@@ -4,3 +4,6 @@ swag fmt
 swag init -g internal/handler/routes/docs_route.go
 
 http://localhost:8080/docs/index.html
+
+
+ sqlc generate

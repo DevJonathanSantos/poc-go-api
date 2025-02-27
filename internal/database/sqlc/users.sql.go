@@ -135,7 +135,7 @@ func (q *Queries) FindManyUsers(ctx context.Context) ([]FindManyUsersRow, error)
 }
 
 const findUserByEmail = `-- name: FindUserByEmail :one
-SELECT u.id, u.name, u.email FROM users u WHERE u.email = $1
+SELECT u.id, u.name, u.email FROM users u WHERE u.email = $1 LIMIT 1
 `
 
 type FindUserByEmailRow struct {

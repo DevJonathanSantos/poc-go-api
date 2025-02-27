@@ -10,11 +10,18 @@ import (
 	_ "github.com/DevJonathanSantos/poc-go-api/docs"
 	"github.com/DevJonathanSantos/poc-go-api/internal/database"
 	"github.com/DevJonathanSantos/poc-go-api/internal/database/sqlc"
+	"github.com/DevJonathanSantos/poc-go-api/internal/handler"
 	"github.com/DevJonathanSantos/poc-go-api/internal/handler/routes"
-	userHandler "github.com/DevJonathanSantos/poc-go-api/internal/handler/userhandler"
-	userRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/userepository"
-	userService "github.com/DevJonathanSantos/poc-go-api/internal/service/userservice"
+
 	"github.com/go-chi/chi"
+
+	categoryRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/categoryrepository"
+	productRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/productrepository"
+	userRepository "github.com/DevJonathanSantos/poc-go-api/internal/repository/userepository"
+
+	categoryService "github.com/DevJonathanSantos/poc-go-api/internal/service/categoryservice"
+	productService "github.com/DevJonathanSantos/poc-go-api/internal/service/productservice"
+	userService "github.com/DevJonathanSantos/poc-go-api/internal/service/userservice"
 )
 
 func main() {
@@ -32,16 +39,25 @@ func main() {
 		return
 	}
 
-	router := chi.NewRouter()
 	queries := sqlc.New(dbConnection)
 
 	// user
 	userRepo := userRepository.NewUserRepository(dbConnection, queries)
 	newUserService := userService.NewUserService(userRepo)
-	newUserHandler := userHandler.NewUserHandler(newUserService)
+
+	// category
+	categoryRepo := categoryRepository.NewCategoryRepository(dbConnection, queries)
+	newCategoryService := categoryService.NewCategoryService(categoryRepo)
+
+	// product
+	productRepo := productRepository.NewProductRepository(dbConnection, queries)
+	productsService := productService.NewProductService(productRepo)
+
+	newHandler := handler.NewHandler(newUserService, newCategoryService, productsService)
 
 	// init routes
-	routes.InitUserRoutes(router, newUserHandler)
+	router := chi.NewRouter()
+	routes.InitRoutes(router, newHandler)
 	routes.InitDocsRoutes(router)
 
 	port := fmt.Sprintf(":%s", env.Env.GoPort)

@@ -139,6 +139,7 @@ func (s *service) GetUserByID(ctx context.Context, id string) (*response.UserRes
 
 func (s *service) DeleteUser(ctx context.Context, id string) error {
 
+	slog.Info("OOOOOOOOOOOOOOOO")
 	userExists, err := s.repo.FindUserByID(ctx, id)
 	if err != nil {
 		slog.Error("error to search user by id", "err", err, slog.String("package", "userService"))

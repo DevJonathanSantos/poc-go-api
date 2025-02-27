@@ -13,6 +13,8 @@ import (
 )
 
 func (r *repository) CreateUser(ctx context.Context, u *entity.UserEntity) error {
+
+	slog.Info("XXXXXXXXXXXXXXXXXXXXXXX")
 	err := transaction.Run(ctx, r.db, func(q *sqlc.Queries) error {
 		var err error
 		err = q.CreateUser(ctx, sqlc.CreateUserParams{
@@ -51,9 +53,15 @@ func (r *repository) CreateUser(ctx context.Context, u *entity.UserEntity) error
 }
 
 func (r *repository) FindUserByEmail(ctx context.Context, email string) (*entity.UserEntity, error) {
+
 	user, err := r.queries.FindUserByEmail(ctx, email)
+
 	if err != nil {
-		return nil, err
+		if err != sql.ErrNoRows {
+			return nil, err
+		} else {
+			return nil, nil
+		}
 	}
 	userEntity := entity.UserEntity{
 		ID:    user.ID,
