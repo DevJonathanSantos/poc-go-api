@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/DevJonathanSantos/poc-go-api/api/viacep"
 	"github.com/DevJonathanSantos/poc-go-api/internal/dto"
 	"github.com/DevJonathanSantos/poc-go-api/internal/entity"
 	"github.com/DevJonathanSantos/poc-go-api/internal/handler/response"
@@ -32,11 +33,24 @@ func (s *service) CreateUser(ctx context.Context, u dto.CreateUserDto) error {
 		return errors.New("error to encrypt password")
 	}
 
+	cep, err := viacep.GetCep(u.CEP)
+	if err != nil {
+		slog.Error("error to get cep", "err", err, slog.String("package", "userservice"))
+		return err
+	}
 	newUser := entity.UserEntity{
-		ID:        uuid.New().String(),
-		Name:      u.Name,
-		Email:     u.Email,
-		Password:  string(passwordEncrypted),
+		ID:       uuid.New().String(),
+		Name:     u.Name,
+		Email:    u.Email,
+		Password: string(passwordEncrypted),
+		Address: entity.UserAddress{
+			CEP:        cep.CEP,
+			IBGE:       cep.IBGE,
+			UF:         cep.UF,
+			City:       cep.Localidade,
+			Complement: cep.Complemento,
+			Street:     cep.Logradouro,
+		},
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -62,24 +76,38 @@ func (s *service) UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string
 		return errors.New("user already exists")
 	}
 
+	var updateUser entity.UserEntity
 	if u.Email != "" {
 		verifyUserEmail, err := s.repo.FindUserByEmail(ctx, u.Email)
 		if err != nil {
-			slog.Error("error to search user by email", "err", err, slog.String("package", "userService"))
+			slog.Error("error to search user by email", "err", err, slog.String("package", "userservice"))
 			return err
 		}
 		if verifyUserEmail != nil {
-			slog.Error("user already exists", slog.String("package", "userService"))
+			slog.Error("user already exists", slog.String("package", "userservice"))
 			return errors.New("user already exists")
+		}
+		updateUser.Email = u.Email
+	}
+	if u.CEP != "" {
+		cep, err := viacep.GetCep(u.CEP)
+		if err != nil {
+			slog.Error("error to get cep", "err", err, slog.String("package", "userservice"))
+			return err
+		}
+		updateUser.Address = entity.UserAddress{
+			CEP:        cep.CEP,
+			IBGE:       cep.IBGE,
+			UF:         cep.UF,
+			City:       cep.Localidade,
+			Complement: cep.Complemento,
+			Street:     cep.Logradouro,
 		}
 	}
 
-	updateUser := entity.UserEntity{
-		ID:        id,
-		Name:      u.Name,
-		Email:     u.Email,
-		UpdatedAt: time.Now(),
-	}
+	updateUser.ID = id
+	updateUser.Name = u.Name
+	updateUser.UpdatedAt = time.Now()
 	err = s.repo.UpdateUser(ctx, &updateUser)
 	if err != nil {
 		slog.Error("error to update user", "err", err, slog.String("package", "userService"))
