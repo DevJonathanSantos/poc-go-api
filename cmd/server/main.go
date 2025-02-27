@@ -7,6 +7,7 @@ import (
 
 	logger "github.com/DevJonathanSantos/poc-go-api/config"
 	"github.com/DevJonathanSantos/poc-go-api/config/env"
+	_ "github.com/DevJonathanSantos/poc-go-api/docs"
 	"github.com/DevJonathanSantos/poc-go-api/internal/database"
 	"github.com/DevJonathanSantos/poc-go-api/internal/database/sqlc"
 	"github.com/DevJonathanSantos/poc-go-api/internal/handler/routes"
@@ -41,6 +42,7 @@ func main() {
 
 	// init routes
 	routes.InitUserRoutes(router, newUserHandler)
+	routes.InitDocsRoutes(router)
 
 	port := fmt.Sprintf(":%s", env.Env.GoPort)
 	slog.Info(fmt.Sprintf("server running on port %s", port))

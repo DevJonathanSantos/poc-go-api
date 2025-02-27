@@ -1,0 +1,4 @@
+Swagger
+
+swag fmt
+swag init -g internal/handler/routes/docs_route.go
