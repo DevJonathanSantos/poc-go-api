@@ -17,7 +17,6 @@ func NewUserService(repo userRepository.UserRepository) UserService {
 type service struct {
 	repo userRepository.UserRepository
 }
-
 type UserService interface {
 	CreateUser(ctx context.Context, u dto.CreateUserDto) error
 	UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string) error
@@ -25,4 +24,5 @@ type UserService interface {
 	DeleteUser(ctx context.Context, id string) error
 	FindManyUsers(ctx context.Context) (*response.ManyUsersResponse, error)
 	UpdateUserPassword(ctx context.Context, u *dto.UpdateUserPasswordDto, id string) error
+	Login(ctx context.Context, u dto.LoginDTO) (*response.UserAuthToken, error)
 }
