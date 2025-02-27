@@ -121,8 +121,14 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.service.UpdateUser(r.Context(), req, id)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error to update user: %v", err), slog.String("package", "userHandler"))
-		w.WriteHeader(http.StatusInternalServerError)
+		slog.Error(fmt.Sprintf("error to update user: %v", err), slog.String("package", "handler_user"))
+		if err.Error() == "user not found" {
+			w.WriteHeader(http.StatusNotFound)
+			msg := httperr.NewNotFoundError("user not found")
+			json.NewEncoder(w).Encode(msg)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
 		msg := httperr.NewBadRequestError("error to update user")
 		json.NewEncoder(w).Encode(msg)
 		return
