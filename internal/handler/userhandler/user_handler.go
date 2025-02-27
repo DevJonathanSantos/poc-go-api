@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/DevJonathanSantos/poc-go-api/internal/common/utils"
 	"github.com/DevJonathanSantos/poc-go-api/internal/dto"
 	"github.com/DevJonathanSantos/poc-go-api/internal/handler/httperr"
 	"github.com/DevJonathanSantos/poc-go-api/internal/handler/validation"
@@ -149,32 +150,30 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 //	@Security		ApiKeyAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		string	true	"user id"
 //	@Success		200	{object}	response.UserResponse
 //	@Failure		400	{object}	httperr.RestErr
 //	@Failure		404	{object}	httperr.RestErr
 //	@Failure		500	{object}	httperr.RestErr
-//	@Router			/user/{id} [get]
+//	@Router			/user [get]
 func (h *handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	if id == "" {
-		slog.Error("id is empty", slog.String("package", "userHandler"))
+	user, err := utils.DecodeJwt(r)
+	if err != nil {
+		slog.Error("error to decode jwt", slog.String("package", "userhandler"))
 		w.WriteHeader(http.StatusBadRequest)
-		msg := httperr.NewBadRequestError("id is required")
+		msg := httperr.NewBadRequestError("error to decode jwt")
 		json.NewEncoder(w).Encode(msg)
 		return
 	}
-	_, err := uuid.Parse(id)
+
+	res, err := h.service.GetUserByID(r.Context(), user.ID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error to parse id: %v", err), slog.String("package", "userHandler"))
-		w.WriteHeader(http.StatusBadRequest)
-		msg := httperr.NewBadRequestError("error to parse id")
-		json.NewEncoder(w).Encode(msg)
-		return
-	}
-	res, err := h.service.GetUserByID(r.Context(), id)
-	if err != nil {
-		slog.Error(fmt.Sprintf("error to get user: %v", err), slog.String("package", "userHandler"))
+		slog.Error(fmt.Sprintf("error to get user: %v", err), slog.String("package", "userhandler"))
+		if err.Error() == "user not found" {
+			w.WriteHeader(http.StatusNotFound)
+			msg := httperr.NewNotFoundError("user not found")
+			json.NewEncoder(w).Encode(msg)
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		msg := httperr.NewBadRequestError("error to get user")
 		json.NewEncoder(w).Encode(msg)
@@ -239,7 +238,7 @@ func (h *handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	httperr.RestErr
 //	@Failure		404	{object}	httperr.RestErr
 //	@Failure		500	{object}	httperr.RestErr
-//	@Router			/user [get]
+//	@Router			/user/list-all [get]
 func (h *handler) FindManyUsers(w http.ResponseWriter, r *http.Request) {
 	res, err := h.service.FindManyUsers(r.Context())
 	if err != nil {

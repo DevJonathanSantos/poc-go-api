@@ -22,7 +22,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get many users",
+                "description": "Get user by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,12 +32,12 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get many users",
+                "summary": "User details",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ManyUsersResponse"
+                            "$ref": "#/definitions/response.UserResponse"
                         }
                     },
                     "400": {
@@ -153,6 +153,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/list-all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get many users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get many users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ManyUsersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httperr.RestErr"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httperr.RestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httperr.RestErr"
+                        }
+                    }
+                }
+            }
+        },
         "/user/password/{id}": {
             "patch": {
                 "security": [
@@ -209,59 +255,6 @@ const docTemplate = `{
             }
         },
         "/user/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get user by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "User details",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/httperr.RestErr"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/httperr.RestErr"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/httperr.RestErr"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -318,11 +311,17 @@ const docTemplate = `{
         "dto.CreateUserDto": {
             "type": "object",
             "required": [
+                "cep",
                 "email",
                 "name",
                 "password"
             ],
             "properties": {
+                "cep": {
+                    "type": "string",
+                    "maxLength": 8,
+                    "minLength": 8
+                },
                 "email": {
                     "type": "string"
                 },
@@ -341,6 +340,11 @@ const docTemplate = `{
         "dto.UpdateUserDto": {
             "type": "object",
             "properties": {
+                "cep": {
+                    "type": "string",
+                    "maxLength": 8,
+                    "minLength": 8
+                },
                 "email": {
                     "type": "string"
                 },
